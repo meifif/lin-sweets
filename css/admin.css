@@ -1,12 +1,20 @@
-/* Admin panel — RTL */
+/* Admin panel — RTL, aligned with public brand */
 :root {
-  --admin-primary: #8b4513;
-  --admin-bg: #fdfaf7;
-  --admin-card: #fff;
-  --admin-border: rgba(139, 69, 19, 0.2);
-  --admin-text: #3d2b1f;
-  --admin-muted: #6b5348;
-  --font-body: 'Heebo', sans-serif;
+  --admin-ink: #1a1412;
+  --admin-rose: #9e4d4a;
+  --admin-rose-deep: #7a3b38;
+  --admin-honey: #c4a35a;
+  --admin-bg: #fbf7f2;
+  --admin-bg-accent: #efe4dc;
+  --admin-card: #fffcfa;
+  --admin-border: rgba(58, 48, 43, 0.14);
+  --admin-text: #3a302b;
+  --admin-muted: #6b5e56;
+  --admin-sage: #5c6b56;
+  --font-display: 'Frank Ruhl Libre', 'Noto Serif Hebrew', serif;
+  --font-body: 'Rubik', 'Heebo', sans-serif;
+  --radius: 14px;
+  --shadow: 0 4px 24px rgba(26, 20, 18, 0.07);
 }
 
 *,
@@ -21,14 +29,21 @@ body {
   text-align: right;
   font-family: var(--font-body);
   font-size: 16px;
-  line-height: 1.5;
+  line-height: 1.55;
   color: var(--admin-text);
   background: var(--admin-bg);
+  background-image: radial-gradient(ellipse 100% 60% at 100% 0%, rgba(196, 163, 90, 0.07), transparent 50%);
   min-height: 100vh;
 }
 
 a {
-  color: var(--admin-primary);
+  color: var(--admin-rose-deep);
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--admin-rose);
 }
 
 a:focus-visible,
@@ -36,12 +51,19 @@ button:focus-visible,
 input:focus-visible,
 textarea:focus-visible,
 select:focus-visible {
-  outline: 2px solid var(--admin-primary);
-  outline-offset: 2px;
+  outline: 2px solid var(--admin-rose);
+  outline-offset: 3px;
 }
 
 .is-hidden {
   display: none !important;
+}
+
+#login-panel {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 1.5rem;
 }
 
 .admin-topbar {
@@ -49,68 +71,93 @@ select:focus-visible {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  padding: 1rem 1.25rem;
-  background: var(--admin-card);
+  padding: 1rem 1.35rem;
+  background: rgba(255, 252, 250, 0.92);
+  backdrop-filter: blur(10px);
   border-bottom: 1px solid var(--admin-border);
   position: sticky;
   top: 0;
   z-index: 50;
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.8) inset;
 }
 
 .admin-topbar h1 {
   margin: 0;
-  font-size: 1.15rem;
+  font-family: var(--font-display);
+  font-size: 1.2rem;
   font-weight: 700;
+  color: var(--admin-ink);
 }
 
 .admin-topbar__actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.admin-topbar__actions a {
+  text-decoration: none;
+  font-size: 0.92rem;
 }
 
 .admin-wrap {
-  max-width: 960px;
+  max-width: 920px;
   margin: 0 auto;
-  padding: 1.5rem 1rem 3rem;
+  padding: 1.75rem 1rem 3.5rem;
 }
 
 .login-card {
-  max-width: 400px;
-  margin: 4rem auto;
-  padding: 2rem;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 2.25rem 2rem;
   background: var(--admin-card);
-  border-radius: 16px;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: var(--shadow);
   border: 1px solid var(--admin-border);
 }
 
 .login-card h2 {
-  margin: 0 0 1.25rem;
-  font-size: 1.25rem;
+  margin: 0 0 1.35rem;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--admin-ink);
 }
 
 .form-field {
-  margin-bottom: 1rem;
+  margin-bottom: 1.05rem;
 }
 
 .form-field label {
   display: block;
-  font-weight: 500;
-  margin-bottom: 0.35rem;
-  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+  font-size: 0.88rem;
+  color: var(--admin-text);
 }
 
 .form-field input,
 .form-field textarea,
 .form-field select {
   width: 100%;
-  padding: 0.6rem 0.75rem;
+  padding: 0.65rem 0.85rem;
   border: 1px solid var(--admin-border);
-  border-radius: 10px;
+  border-radius: var(--radius);
   font-family: var(--font-body);
   font-size: 1rem;
-  background: #fff;
+  background: var(--admin-bg);
+  color: var(--admin-text);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus,
+.form-field select:focus {
+  outline: none;
+  border-color: var(--admin-rose);
+  box-shadow: 0 0 0 3px rgba(158, 77, 74, 0.12);
 }
 
 .form-field textarea {
@@ -134,46 +181,64 @@ select:focus-visible {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 0.55rem 1.1rem;
-  border-radius: 10px;
+  min-height: 44px;
+  padding: 0.55rem 1.25rem;
+  border-radius: var(--radius);
   border: none;
   font-family: var(--font-body);
   font-size: 0.95rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  background: var(--admin-primary);
+  background: linear-gradient(135deg, var(--admin-rose-deep), var(--admin-rose));
   color: #fff;
+  box-shadow: 0 4px 16px rgba(122, 59, 56, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 20px rgba(122, 59, 56, 0.35);
 }
 
 .btn:disabled {
   opacity: 0.55;
   cursor: not-allowed;
+  transform: none;
 }
 
 .btn--ghost {
   background: transparent;
-  color: var(--admin-primary);
-  border: 2px solid var(--admin-primary);
+  color: var(--admin-rose-deep);
+  border: 2px solid var(--admin-rose-deep);
+  box-shadow: none;
+}
+
+.btn--ghost:hover:not(:disabled) {
+  background: rgba(158, 77, 74, 0.06);
 }
 
 .btn--danger {
-  background: #a33;
+  background: #8b2e2e;
+  box-shadow: 0 4px 16px rgba(139, 46, 46, 0.25);
 }
 
 .card {
   background: var(--admin-card);
-  border-radius: 16px;
-  padding: 1.25rem 1.5rem;
-  margin-bottom: 1.5rem;
+  border-radius: 18px;
+  padding: 1.35rem 1.5rem;
+  margin-bottom: 1.35rem;
   border: 1px solid var(--admin-border);
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 2px 16px rgba(26, 20, 18, 0.04);
 }
 
 .card h2 {
-  margin: 0 0 1rem;
-  font-size: 1.1rem;
-  border-bottom: 1px solid var(--admin-border);
-  padding-bottom: 0.5rem;
+  margin: 0 0 1.1rem;
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--admin-ink);
+  border-bottom: 2px solid var(--admin-bg-accent);
+  padding-bottom: 0.6rem;
 }
 
 .checkbox-row {
@@ -185,7 +250,7 @@ select:focus-visible {
 .checkbox-row label {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   font-weight: 400;
   cursor: pointer;
 }
@@ -193,9 +258,10 @@ select:focus-visible {
 .preview-img {
   max-width: 100%;
   max-height: 200px;
-  border-radius: 12px;
+  border-radius: var(--radius);
   margin-top: 0.5rem;
   object-fit: cover;
+  border: 1px solid var(--admin-border);
 }
 
 .admin-list {
@@ -212,17 +278,18 @@ select:focus-visible {
   grid-template-columns: auto auto 1fr auto;
   gap: 0.75rem;
   align-items: center;
-  padding: 0.75rem;
-  background: #fffaf5;
+  padding: 0.85rem;
+  background: linear-gradient(135deg, #fff 0%, var(--admin-bg) 100%);
   border: 1px solid var(--admin-border);
-  border-radius: 12px;
+  border-radius: var(--radius);
 }
 
 .admin-list__item img {
   width: 72px;
   height: 72px;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--admin-border);
 }
 
 .drag-handle {
@@ -263,18 +330,18 @@ select:focus-visible {
 
 .toast {
   pointer-events: auto;
-  padding: 0.75rem 1rem;
-  border-radius: 10px;
-  background: #2c1a0e;
-  color: #fdfaf7;
+  padding: 0.85rem 1.1rem;
+  border-radius: var(--radius);
+  background: var(--admin-ink);
+  color: var(--admin-bg);
   font-size: 0.9rem;
   max-width: min(420px, 100%);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
-  animation: toast-in 0.25s ease;
+  box-shadow: var(--shadow);
+  animation: toast-in 0.28s ease;
 }
 
 .toast--error {
-  background: #7a1f1f;
+  background: #6b2222;
 }
 
 @keyframes toast-in {
@@ -290,6 +357,7 @@ select:focus-visible {
 
 .hint {
   font-size: 0.8rem;
-  color: var(--admin-muted);
-  margin-top: 0.25rem;
+  color: var(--admin-sage);
+  margin-top: 0.35rem;
+  line-height: 1.45;
 }
