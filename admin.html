@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>ניהול אתר — לין יפרח</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/admin.css" />
+  </head>
+  <body>
+    <div id="login-panel">
+      <div class="login-card">
+        <h2>כניסת מנהלים</h2>
+        <form id="login-form">
+          <div class="form-field">
+            <label for="login-email">אימייל</label>
+            <input type="email" id="login-email" name="email" required autocomplete="username" />
+          </div>
+          <div class="form-field">
+            <label for="login-password">סיסמה</label>
+            <input type="password" id="login-password" name="password" required autocomplete="current-password" />
+          </div>
+          <button type="submit" class="btn" id="login-submit">התחברות</button>
+          <p class="hint" id="login-error" style="color: #a33; margin-top: 0.75rem; display: none"></p>
+        </form>
+      </div>
+    </div>
+
+    <div id="admin-panel" class="is-hidden">
+      <header class="admin-topbar">
+        <h1>ניהול תוכן — לין יפרח</h1>
+        <div class="admin-topbar__actions">
+          <a href="index.html">חזרה לאתר</a>
+          <button type="button" class="btn btn--ghost" id="logout-btn">התנתקות</button>
+        </div>
+      </header>
+
+      <div class="admin-wrap">
+        <section class="card" id="card-hero">
+          <h2>אזור ראשי (Hero)</h2>
+          <div class="form-field">
+            <label for="hero-title">כותרת ראשית</label>
+            <input type="text" id="hero-title" />
+          </div>
+          <div class="form-field">
+            <label for="hero-subtitle">תת-כותרת</label>
+            <input type="text" id="hero-subtitle" />
+          </div>
+          <div class="form-field">
+            <label for="hero-cta">טקסט כפתור</label>
+            <input type="text" id="hero-cta" />
+          </div>
+          <div class="form-field">
+            <label for="hero-bg-file">תמונת רקע</label>
+            <input type="file" id="hero-bg-file" accept="image/*" />
+            <p class="hint">העלאה תעדכן מיד את כתובת התמונה ב-Firestore</p>
+            <img class="preview-img is-hidden" id="hero-bg-preview" alt="" />
+          </div>
+          <button type="button" class="btn" id="hero-save-text">שמירת טקסטים</button>
+        </section>
+
+        <section class="card" id="card-about">
+          <h2>מי אני</h2>
+          <div class="form-field">
+            <label for="about-text">טקסט</label>
+            <textarea id="about-text" rows="8"></textarea>
+          </div>
+          <div class="form-field">
+            <label for="about-image-file">תמונת פרופיל</label>
+            <input type="file" id="about-image-file" accept="image/*" />
+            <img class="preview-img is-hidden" id="about-image-preview" alt="" />
+          </div>
+          <button type="button" class="btn" id="about-save">שמירה</button>
+          <button type="button" class="btn btn--ghost" id="about-upload-only">העלאת תמונה בלבד</button>
+        </section>
+
+        <section class="card" id="card-contact">
+          <h2>פרטי קשר</h2>
+          <div class="form-row">
+            <div class="form-field">
+              <label for="contact-phone">טלפון (תצוגה)</label>
+              <input type="text" id="contact-phone" />
+            </div>
+            <div class="form-field">
+              <label for="contact-whatsapp">וואטסאפ (ספרות בלבד, לדוגמה 972501234567)</label>
+              <input type="text" id="contact-whatsapp" />
+            </div>
+          </div>
+          <div class="form-field">
+            <label for="contact-email">אימייל ליצירת קשר</label>
+            <input type="email" id="contact-email" />
+          </div>
+          <div class="form-field">
+            <label for="contact-instagram">אינסטגרם (שם משתמש או @user)</label>
+            <input type="text" id="contact-instagram" />
+          </div>
+          <div class="form-field">
+            <label for="contact-facebook">קישור פייסבוק</label>
+            <input type="url" id="contact-facebook" />
+          </div>
+          <div class="form-field">
+            <label for="contact-service">אזור שירות</label>
+            <input type="text" id="contact-service" />
+          </div>
+          <button type="button" class="btn" id="contact-save">שמירת פרטי קשר</button>
+        </section>
+
+        <section class="card" id="card-menu">
+          <h2>תפריט</h2>
+          <p class="hint">גררו פריטים כדי לשנות סדר התצוגה באתר.</p>
+          <form id="menu-item-form">
+            <input type="hidden" id="menu-edit-id" value="" />
+            <div class="form-row">
+              <div class="form-field">
+                <label for="menu-name">שם מוצר</label>
+                <input type="text" id="menu-name" required />
+              </div>
+              <div class="form-field">
+                <label for="menu-category">קטגוריה</label>
+                <select id="menu-category" required>
+                  <option value="עוגיות">עוגיות</option>
+                  <option value="עוגות">עוגות</option>
+                  <option value="מתוקים">מתוקים</option>
+                  <option value="עונתי">עונתי</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="menu-desc">תיאור קצר</label>
+              <textarea id="menu-desc" rows="3"></textarea>
+            </div>
+            <div class="form-field">
+              <label for="menu-price">מחיר (אופציונלי)</label>
+              <input type="text" id="menu-price" placeholder="לדוגמה: 25₪ / 6 יחידות" />
+            </div>
+            <div class="form-field">
+              <span>תגיות</span>
+              <div class="checkbox-row">
+                <label><input type="checkbox" id="tag-kosher" value="כשר" /> כשר</label>
+                <label><input type="checkbox" id="tag-gluten" value="ללא גלוטן" /> ללא גלוטן</label>
+                <label><input type="checkbox" id="tag-vegan" value="טבעוני" /> טבעוני</label>
+              </div>
+            </div>
+            <div class="form-field">
+              <label for="menu-image-file">תמונת מוצר</label>
+              <input type="file" id="menu-image-file" accept="image/*" />
+              <img class="preview-img is-hidden" id="menu-image-preview" alt="" />
+            </div>
+            <button type="submit" class="btn" id="menu-save-btn">הוספת מוצר</button>
+            <button type="button" class="btn btn--ghost is-hidden" id="menu-cancel-edit">ביטול עריכה</button>
+          </form>
+
+          <h3 style="margin-top: 1.5rem; font-size: 1rem">מוצרים קיימים</h3>
+          <ul class="admin-list" id="menu-admin-list"></ul>
+        </section>
+
+        <section class="card" id="card-gallery">
+          <h2>גלריה</h2>
+          <div class="form-field">
+            <label for="gallery-files">העלאת תמונות (מרובות)</label>
+            <input type="file" id="gallery-files" accept="image/*" multiple />
+          </div>
+          <div class="form-field">
+            <label for="gallery-caption-default">כיתוב ברירת מחדל (אופציונלי)</label>
+            <input type="text" id="gallery-caption-default" />
+          </div>
+          <button type="button" class="btn" id="gallery-upload-btn">העלאה לגלריה</button>
+          <p class="hint">גררו לשינוי סדר התצוגה באתר.</p>
+          <ul class="admin-list" id="gallery-admin-list"></ul>
+        </section>
+      </div>
+    </div>
+
+    <div class="toast-stack" id="toast-stack" aria-live="polite"></div>
+
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+    <script type="module" src="js/admin.js"></script>
+  </body>
+</html>
