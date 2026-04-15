@@ -703,9 +703,15 @@ em { font-style: italic; color: var(--gold); }
   height: 100%;
   transition: transform 0.5s var(--ease);
 }
+.gal-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
 .gal-item:hover .gal-img { transform: scale(1.06); }
 
-/* Placeholder gradients — replace with <img> for real photos */
+/* Placeholder gradients — used when no real photo */
 .gal-item:nth-child(1) .gal-img { background: linear-gradient(145deg, #2C1810, #6B3A28); }
 .gal-item:nth-child(2) .gal-img { background: linear-gradient(145deg, #1A1210, #4A2822); }
 .gal-item:nth-child(3) .gal-img { background: linear-gradient(145deg, #201818, #5C3030); }

@@ -7,100 +7,85 @@
    STATIC MENU DATA — edit this to update the site
    ══════════════════════════════════════════════════════════════ */
 const MENU = {
-  'עוגיות': [
+  'מגשי ביס': [
     {
-      name: 'עוגיות שוקולד צ׳יפס',
-      desc: 'עוגיות ביתיות עם שוקולד מריר טובעני ונגיסות',
-      price: '30₪ / 6 יחידות',
-      tags: ['כשר'],
-      initial: 'ש',
-      grad: 'linear-gradient(145deg, #2C1810, #5C3020)',
+      name: 'ביס לחמניות בית',
+      desc: '15 יחידות לחמניות ביתיות במילואים — לבחירה: סביח, סלט טונה, סלט ביצים, שמנת מטובלת. מיקס של כמה סוגים 200₪',
+      price: '180₪ (סוג אחד) | 200₪ (מיקס)',
+      imageUrl: 'images/menu/rolls.jpg',
     },
     {
-      name: 'עוגיות חמאה',
-      desc: 'עוגיות חמאה פריכות ועדינות, אפשרות לקינמון',
-      price: '28₪ / 6 יחידות',
-      tags: ['כשר'],
-      initial: 'ח',
-      grad: 'linear-gradient(145deg, #1A1812, #4A3820)',
+      name: 'טורטיה במילוי',
+      desc: '12 יחידות טורטיה עם מילויים משתנים ומגוונים',
+      price: '140₪',
+      imageUrl: 'images/menu/tortilla.jpg',
     },
     {
-      name: 'עוגיות שיבולת שועל',
-      desc: 'עם שוקולד ואגוזים, בריא וטעים',
-      price: '25₪ / 6 יחידות',
-      tags: ['כשר', 'ללא גלוטן'],
-      initial: 'ב',
-      grad: 'linear-gradient(145deg, #1E1C10, #504028)',
-    },
-  ],
-  'עוגות': [
-    {
-      name: 'עוגת שוקולד',
-      desc: 'עוגת שוקולד לחה ועשירה עם גנאש מריר',
-      price: 'מ-120₪',
-      tags: ['כשר'],
-      initial: 'ע',
-      grad: 'linear-gradient(145deg, #1C1010, #4A2020)',
+      name: 'מגש ביס תפוחי אדמה מדורה',
+      desc: 'תפוחי אדמה אפויים בשום ושמן זית — רכים מבפנים ומוזהבים מבחוץ',
+      price: '120₪',
+      imageUrl: 'images/menu/potatoes.jpg',
     },
     {
-      name: 'עוגת גבינה',
-      desc: 'גבינה קרמית על בסיס ביסקוויט פריך',
-      price: 'מ-140₪',
-      tags: ['כשר'],
-      initial: 'ג',
-      grad: 'linear-gradient(145deg, #201818, #503838)',
+      name: 'מגש ביס בצק עלים מלוח',
+      desc: '20 יחידות בצק עלים פריך ומלוח — מושלם לאירוע',
+      price: '150₪',
+      imageUrl: 'images/menu/puff-pastry.jpg',
     },
     {
-      name: 'עוגת קרמל',
-      desc: 'קרמל עם מלח ים ומוס שמנת מפנק',
-      price: 'מ-150₪',
-      tags: ['כשר'],
-      initial: 'ק',
-      grad: 'linear-gradient(145deg, #201810, #5A4018)',
+      name: 'קוראסון בולגרית',
+      desc: '15 יחידות קוראסון בולגרי ממולא בשכבות — פריך ועשיר',
+      price: '180₪',
+      imageUrl: 'images/menu/croissant.jpg',
+    },
+    {
+      name: 'קיש אישי',
+      desc: '20 יחידות קיש בגדלים אישיים עם מילויים מגוונים',
+      price: '160₪',
+      imageUrl: 'images/menu/quiche.jpg',
+    },
+    {
+      name: 'לחמניות בית שום',
+      desc: '10 יחידות לחמניות ביתיות ברוטב שום עשיר — ריח שלא ניתן לעמוד בפניו',
+      price: '80₪',
+      imageUrl: 'images/menu/garlic-buns.jpg',
     },
   ],
-  'מתוקים': [
+  'סלטים': [
     {
-      name: 'מקרונים',
-      desc: 'מקרונים צרפתיים בטעמים עונתיים מפתיעים',
-      price: '12₪ ליחידה',
-      tags: ['כשר'],
+      name: 'מגש ירקות',
+      desc: 'מגש ירקות טריים וצבעוניים — תירס, גזר, מלפפון, פלפל, עגבניות שרי, צנוניות ועוד',
+      price: '100₪',
+      imageUrl: 'images/menu/vegetables.jpg',
+    },
+    {
+      name: 'מגש סלטים',
+      desc: 'מבחר סלטים עשירים ומגוונים — מתאים לכל אירוע',
+      price: '100₪',
+      imageUrl: 'images/menu/salads.jpg',
+    },
+  ],
+  'פירות': [
+    {
+      name: 'מגש פירות',
+      desc: 'מגש פירות העונה בסידור מרהיב — אבטיח, מנגו, ענבים, קיווי, פסיפלורה ועוד. מינימום הזמנה 10 יחידות',
+      price: 'החל מ-120₪',
+      imageUrl: 'images/menu/fruits.jpg',
+    },
+    {
+      name: 'כוסות ／ קופסאות פירות',
+      desc: 'כוסות או קופסאות אישיות חצי קילו / קילו — פירות העונה הטריים ביותר. מינימום הזמנה 10 יחידות',
+      price: 'לפי עונה',
+      imageUrl: 'images/menu/fruits.jpg',
+    },
+  ],
+  'שולחן מתוק': [
+    {
+      name: 'שולחן מתוק',
+      desc: '8 סוגי קינוחים מתחלפים לעד 15 סועדים — חוויה מתוקה ומרשימה לכל אירוע',
+      price: 'לפי הזמנה',
+      grad: 'linear-gradient(145deg, #2C1018, #6C2840)',
       initial: 'מ',
-      grad: 'linear-gradient(145deg, #1A1218, #4A2840)',
-    },
-    {
-      name: 'טראפלס שוקולד',
-      desc: 'כדורי שוקולד בלגי איכותי בציפוי קקאו',
-      price: '8₪ ליחידה',
-      tags: ['כשר', 'טבעוני'],
-      initial: 'ט',
-      grad: 'linear-gradient(145deg, #181210, #3C2818)',
-    },
-    {
-      name: 'בראוניז',
-      desc: 'בראוניז לחים ועשירים בשוקולד מריר',
-      price: '35₪ / 6 יחידות',
-      tags: ['כשר'],
-      initial: 'ב',
-      grad: 'linear-gradient(145deg, #1C1410, #4A3020)',
-    },
-  ],
-  'עונתי': [
-    {
-      name: 'לחמניות קינמון',
-      desc: 'לחמניות חמות עם קינמון, פקאן וציפוי שמנת',
-      price: '20₪ ליחידה',
-      tags: ['כשר'],
-      initial: 'ל',
-      grad: 'linear-gradient(145deg, #201810, #583820)',
-    },
-    {
-      name: 'עוגיות ג׳ינג׳ר',
-      desc: 'עוגיות תבלין חגיגיות עם ג׳ינג׳ר וקינמון',
-      price: '30₪ / 6 יחידות',
-      tags: ['כשר', 'טבעוני'],
-      initial: 'ג',
-      grad: 'linear-gradient(145deg, #1E1A10, #4E3C18)',
     },
   ],
 };
@@ -170,12 +155,20 @@ function renderMenu(category) {
     const imgDiv = document.createElement('div');
     imgDiv.className = 'menu-card__img';
 
-    const placeholder = document.createElement('div');
-    placeholder.className = 'menu-card__img-placeholder';
-    placeholder.style.setProperty('--placeholder-grad', item.grad);
-    placeholder.dataset.initial = item.initial || '';
-    placeholder.style.background = item.grad;
-    imgDiv.appendChild(placeholder);
+    if (item.imageUrl) {
+      const img = document.createElement('img');
+      img.src = item.imageUrl;
+      img.alt = item.name;
+      img.loading = 'lazy';
+      imgDiv.appendChild(img);
+    } else {
+      const placeholder = document.createElement('div');
+      placeholder.className = 'menu-card__img-placeholder';
+      placeholder.style.setProperty('--placeholder-grad', item.grad);
+      placeholder.dataset.initial = item.initial || '';
+      placeholder.style.background = item.grad;
+      imgDiv.appendChild(placeholder);
+    }
 
     const body = document.createElement('div');
     body.className = 'menu-card__body';
