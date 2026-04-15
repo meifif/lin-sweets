@@ -1,423 +1,290 @@
 /**
- * Public site: layout, Firestore-driven content, gallery, menu tabs.
+ * Lin Sweets — public site
+ * Static, no Firebase. Update MENU data below to edit content.
  */
-import { db } from './firebase-config.js';
-import {
-  MENU_CATEGORIES,
-  fetchMainSettings,
-  fetchMenuItems,
-  fetchGalleryPage,
-} from './menu.js';
 
-const PLACEHOLDER_PRODUCT = 'images/placeholder/product.svg';
-const PLACEHOLDER_HERO = 'images/placeholder/hero.svg';
-
-const DEFAULT_SETTINGS = {
-  heroTitle: 'מתוקים עם אהבה',
-  heroSubtitle: 'כי כל רגע מיוחד מגיע לקבל משהו מתוק',
-  heroCtaText: 'לגלות את התפריט',
-  heroBgImageUrl: '',
-  aboutText: document.getElementById('about-text')?.textContent?.trim() ?? '',
-  aboutImageUrl: '',
-  phone: '',
-  whatsapp: '',
-  contactEmail: '',
-  instagram: '',
-  facebook: '',
-  serviceArea: 'תל אביב והמרכז',
+/* ══════════════════════════════════════════════════════════════
+   STATIC MENU DATA — edit this to update the site
+   ══════════════════════════════════════════════════════════════ */
+const MENU = {
+  'עוגיות': [
+    {
+      name: 'עוגיות שוקולד צ׳יפס',
+      desc: 'עוגיות ביתיות עם שוקולד מריר טובעני ונגיסות',
+      price: '30₪ / 6 יחידות',
+      tags: ['כשר'],
+      initial: 'ש',
+      grad: 'linear-gradient(145deg, #2C1810, #5C3020)',
+    },
+    {
+      name: 'עוגיות חמאה',
+      desc: 'עוגיות חמאה פריכות ועדינות, אפשרות לקינמון',
+      price: '28₪ / 6 יחידות',
+      tags: ['כשר'],
+      initial: 'ח',
+      grad: 'linear-gradient(145deg, #1A1812, #4A3820)',
+    },
+    {
+      name: 'עוגיות שיבולת שועל',
+      desc: 'עם שוקולד ואגוזים, בריא וטעים',
+      price: '25₪ / 6 יחידות',
+      tags: ['כשר', 'ללא גלוטן'],
+      initial: 'ב',
+      grad: 'linear-gradient(145deg, #1E1C10, #504028)',
+    },
+  ],
+  'עוגות': [
+    {
+      name: 'עוגת שוקולד',
+      desc: 'עוגת שוקולד לחה ועשירה עם גנאש מריר',
+      price: 'מ-120₪',
+      tags: ['כשר'],
+      initial: 'ע',
+      grad: 'linear-gradient(145deg, #1C1010, #4A2020)',
+    },
+    {
+      name: 'עוגת גבינה',
+      desc: 'גבינה קרמית על בסיס ביסקוויט פריך',
+      price: 'מ-140₪',
+      tags: ['כשר'],
+      initial: 'ג',
+      grad: 'linear-gradient(145deg, #201818, #503838)',
+    },
+    {
+      name: 'עוגת קרמל',
+      desc: 'קרמל עם מלח ים ומוס שמנת מפנק',
+      price: 'מ-150₪',
+      tags: ['כשר'],
+      initial: 'ק',
+      grad: 'linear-gradient(145deg, #201810, #5A4018)',
+    },
+  ],
+  'מתוקים': [
+    {
+      name: 'מקרונים',
+      desc: 'מקרונים צרפתיים בטעמים עונתיים מפתיעים',
+      price: '12₪ ליחידה',
+      tags: ['כשר'],
+      initial: 'מ',
+      grad: 'linear-gradient(145deg, #1A1218, #4A2840)',
+    },
+    {
+      name: 'טראפלס שוקולד',
+      desc: 'כדורי שוקולד בלגי איכותי בציפוי קקאו',
+      price: '8₪ ליחידה',
+      tags: ['כשר', 'טבעוני'],
+      initial: 'ט',
+      grad: 'linear-gradient(145deg, #181210, #3C2818)',
+    },
+    {
+      name: 'בראוניז',
+      desc: 'בראוניז לחים ועשירים בשוקולד מריר',
+      price: '35₪ / 6 יחידות',
+      tags: ['כשר'],
+      initial: 'ב',
+      grad: 'linear-gradient(145deg, #1C1410, #4A3020)',
+    },
+  ],
+  'עונתי': [
+    {
+      name: 'לחמניות קינמון',
+      desc: 'לחמניות חמות עם קינמון, פקאן וציפוי שמנת',
+      price: '20₪ ליחידה',
+      tags: ['כשר'],
+      initial: 'ל',
+      grad: 'linear-gradient(145deg, #201810, #583820)',
+    },
+    {
+      name: 'עוגיות ג׳ינג׳ר',
+      desc: 'עוגיות תבלין חגיגיות עם ג׳ינג׳ר וקינמון',
+      price: '30₪ / 6 יחידות',
+      tags: ['כשר', 'טבעוני'],
+      initial: 'ג',
+      grad: 'linear-gradient(145deg, #1E1A10, #4E3C18)',
+    },
+  ],
 };
 
-const GALLERY_PAGE_SIZE = 12;
+const CATEGORIES = Object.keys(MENU);
 
-/** @type {InstanceType<typeof window.SimpleLightbox> | null} */
-let galleryLightbox = null;
+/* ══════════════════════════════════════════════════════════════
+   HEADER
+   ══════════════════════════════════════════════════════════════ */
+function initHeader() {
+  const header = document.getElementById('header');
+  const burger = document.getElementById('burger');
+  const drawer = document.getElementById('drawer');
 
-function digitsOnly(s) {
-  return String(s || '').replace(/\D/g, '');
+  // Solid on scroll
+  const onScroll = () => header.classList.toggle('is-solid', window.scrollY > 50);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  // Mobile drawer toggle
+  burger.addEventListener('click', () => {
+    const open = header.classList.toggle('is-open');
+    burger.setAttribute('aria-expanded', open);
+    drawer.setAttribute('aria-hidden', !open);
+  });
+
+  // Close drawer on link click
+  drawer.querySelectorAll('a').forEach((a) => {
+    a.addEventListener('click', () => {
+      header.classList.remove('is-open');
+      burger.setAttribute('aria-expanded', 'false');
+      drawer.setAttribute('aria-hidden', 'true');
+    });
+  });
 }
 
-function instagramUrl(handle) {
-  const h = String(handle || '').replace(/^@/, '').trim();
-  if (!h) return '#';
-  return `https://instagram.com/${encodeURIComponent(h)}`;
+/* ══════════════════════════════════════════════════════════════
+   SMOOTH SCROLL
+   ══════════════════════════════════════════════════════════════ */
+function initSmoothScroll() {
+  document.querySelectorAll('a[data-scroll]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href || !href.startsWith('#')) return;
+      const target = document.getElementById(href.slice(1));
+      if (!target) return;
+      e.preventDefault();
+      const headerH = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-h'), 10) || 68;
+      const top = target.getBoundingClientRect().top + window.scrollY - headerH;
+      window.scrollTo({ top, behavior: 'smooth' });
+    });
+  });
 }
 
-function applySettings(data) {
-  const s = { ...DEFAULT_SETTINGS, ...data };
-
-  const hero = document.getElementById('hero');
-  const heroTitle = document.getElementById('hero-title');
-  const heroSubtitle = document.getElementById('hero-subtitle');
-  const heroCta = document.getElementById('hero-cta');
-  const aboutText = document.getElementById('about-text');
-  const aboutImage = document.getElementById('about-image');
-
-  if (hero) {
-    const url = s.heroBgImageUrl || PLACEHOLDER_HERO;
-    const safe = String(url).replace(/\\/g, '\\\\').replace(/"/g, '\\"');
-    hero.style.backgroundImage = `url("${safe}")`;
-  }
-  if (heroTitle) heroTitle.textContent = s.heroTitle || DEFAULT_SETTINGS.heroTitle;
-  if (heroSubtitle) heroSubtitle.textContent = s.heroSubtitle || DEFAULT_SETTINGS.heroSubtitle;
-  if (heroCta) heroCta.textContent = s.heroCtaText || DEFAULT_SETTINGS.heroCtaText;
-
-  if (aboutText) {
-    const t = s.aboutText?.trim();
-    if (t) aboutText.textContent = t;
-  }
-  if (aboutImage) {
-    aboutImage.src = s.aboutImageUrl || PLACEHOLDER_PRODUCT;
-    aboutImage.alt = 'לין יפרח';
-  }
-
-  const phoneEl = document.getElementById('contact-phone');
-  const waEl = document.getElementById('contact-whatsapp');
-  const emailEl = document.getElementById('contact-email');
-  const igEl = document.getElementById('contact-instagram');
-  const fbEl = document.getElementById('contact-facebook');
-  const serviceText = document.getElementById('service-area-text');
-  const footerIg = document.getElementById('footer-instagram');
-  const footerFb = document.getElementById('footer-facebook');
-
-  const phone = s.phone?.trim();
-  if (phoneEl) {
-    phoneEl.textContent = phone || 'טלפון';
-    phoneEl.href = phone ? `tel:${digitsOnly(phone)}` : 'tel:';
-  }
-
-  const wa = digitsOnly(s.whatsapp);
-  if (waEl) {
-    waEl.textContent = wa ? 'וואטסאפ' : 'וואטסאפ';
-    waEl.href = wa ? `https://wa.me/${wa}` : '#';
-    if (!wa) waEl.setAttribute('aria-disabled', 'true');
-    else waEl.removeAttribute('aria-disabled');
-  }
-
-  const em = s.contactEmail?.trim();
-  if (emailEl) {
-    emailEl.textContent = em || 'מייל';
-    emailEl.href = em ? `mailto:${em}` : 'mailto:';
-  }
-
-  const ig = s.instagram?.trim();
-  if (igEl) {
-    igEl.textContent = ig ? (ig.startsWith('@') ? ig : `@${ig}`) : 'אינסטגרם';
-    igEl.href = instagramUrl(ig);
-  }
-  if (footerIg) {
-    footerIg.href = instagramUrl(ig);
-  }
-
-  const fb = s.facebook?.trim();
-  if (fbEl) {
-    fbEl.textContent = 'פייסבוק';
-    fbEl.href = fb || '#';
-  }
-  if (footerFb) {
-    footerFb.href = fb || '#';
-  }
-
-  if (serviceText) {
-    serviceText.textContent = s.serviceArea || DEFAULT_SETTINGS.serviceArea;
-  }
-}
-
-function renderMenuSkeleton(count) {
+/* ══════════════════════════════════════════════════════════════
+   MENU
+   ══════════════════════════════════════════════════════════════ */
+function renderMenu(category) {
   const grid = document.getElementById('menu-grid');
-  if (!grid) return;
-  grid.innerHTML = '';
-  for (let i = 0; i < count; i += 1) {
-    const el = document.createElement('div');
-    el.className = 'skeleton';
-    el.setAttribute('aria-hidden', 'true');
-    grid.appendChild(el);
-  }
-}
-
-function renderMenuItems(items, category) {
-  const grid = document.getElementById('menu-grid');
-  if (!grid) return;
-
-  const filtered = items.filter((it) => (it.category || '') === category);
+  const items = MENU[category] || [];
   grid.innerHTML = '';
 
-  if (filtered.length === 0) {
-    const p = document.createElement('p');
-    p.className = 'empty-state';
-    p.textContent = 'בקרוב יתווספו פריטים לקטגוריה זו.';
-    grid.appendChild(p);
-    return;
-  }
-
-  for (const it of filtered) {
+  items.forEach((item) => {
     const card = document.createElement('article');
     card.className = 'menu-card';
 
-    const imgWrap = document.createElement('div');
-    imgWrap.className = 'menu-card__img-wrap';
-    const img = document.createElement('img');
-    img.className = 'menu-card__img';
-    img.src = it.imageUrl || PLACEHOLDER_PRODUCT;
-    img.alt = it.name || 'מוצר';
-    img.loading = 'lazy';
-    imgWrap.appendChild(img);
+    const imgDiv = document.createElement('div');
+    imgDiv.className = 'menu-card__img';
+
+    const placeholder = document.createElement('div');
+    placeholder.className = 'menu-card__img-placeholder';
+    placeholder.style.setProperty('--placeholder-grad', item.grad);
+    placeholder.dataset.initial = item.initial || '';
+    placeholder.style.background = item.grad;
+    imgDiv.appendChild(placeholder);
 
     const body = document.createElement('div');
     body.className = 'menu-card__body';
 
     const name = document.createElement('h3');
     name.className = 'menu-card__name';
-    name.textContent = it.name || '';
+    name.textContent = item.name;
 
     const desc = document.createElement('p');
     desc.className = 'menu-card__desc';
-    desc.textContent = it.description || '';
+    desc.textContent = item.desc;
 
     body.appendChild(name);
     body.appendChild(desc);
 
-    if (it.price) {
+    if (item.price) {
       const price = document.createElement('p');
       price.className = 'menu-card__price';
-      price.textContent = it.price;
+      price.textContent = item.price;
       body.appendChild(price);
     }
 
-    const tags = Array.isArray(it.tags) ? it.tags : [];
-    if (tags.length) {
-      const tagRow = document.createElement('div');
-      tagRow.className = 'menu-card__tags';
-      for (const t of tags) {
+    if (item.tags && item.tags.length) {
+      const tags = document.createElement('div');
+      tags.className = 'menu-card__tags';
+      item.tags.forEach((t) => {
         const span = document.createElement('span');
-        span.className = 'tag';
+        span.className = 'menu-tag';
         span.textContent = t;
-        tagRow.appendChild(span);
-      }
-      body.appendChild(tagRow);
+        tags.appendChild(span);
+      });
+      body.appendChild(tags);
     }
 
-    card.appendChild(imgWrap);
+    card.appendChild(imgDiv);
     card.appendChild(body);
     grid.appendChild(card);
-  }
+  });
 }
 
-function buildMenuTabs(items) {
-  const wrap = document.getElementById('menu-tabs');
-  if (!wrap) return;
-
-  wrap.innerHTML = '';
-  let activeCategory = MENU_CATEGORIES[0];
+function initMenuTabs() {
+  const tabsEl = document.getElementById('menu-tabs');
+  let active = CATEGORIES[0];
 
   const setActive = (cat) => {
-    activeCategory = cat;
-    wrap.querySelectorAll('.menu-tab').forEach((btn) => {
-      btn.classList.toggle('is-active', btn.dataset.category === cat);
-      btn.setAttribute('aria-selected', btn.dataset.category === cat ? 'true' : 'false');
+    active = cat;
+    tabsEl.querySelectorAll('.menu-tab').forEach((btn) => {
+      const on = btn.dataset.cat === cat;
+      btn.classList.toggle('is-active', on);
+      btn.setAttribute('aria-selected', on);
     });
-    renderMenuItems(items, cat);
+    renderMenu(cat);
   };
 
-  MENU_CATEGORIES.forEach((cat, i) => {
+  CATEGORIES.forEach((cat, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'menu-tab' + (i === 0 ? ' is-active' : '');
     btn.textContent = cat;
-    btn.dataset.category = cat;
+    btn.dataset.cat = cat;
     btn.setAttribute('role', 'tab');
-    btn.setAttribute('aria-selected', i === 0 ? 'true' : 'false');
+    btn.setAttribute('aria-selected', i === 0);
     btn.addEventListener('click', () => setActive(cat));
-    wrap.appendChild(btn);
+    tabsEl.appendChild(btn);
   });
 
-  setActive(activeCategory);
+  renderMenu(active);
 }
 
-/** @param {import('firebase/firestore').QueryDocumentSnapshot[]} docSnaps */
-function appendGalleryNodes(docSnaps, grid) {
-  for (const d of docSnaps) {
-    const data = d.data();
-    const url = data.imageUrl;
-    if (!url) continue;
-
-    const a = document.createElement('a');
-    a.href = url;
-    a.setAttribute('data-caption', data.caption || '');
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = data.caption || 'גלריה';
-    img.loading = 'lazy';
-    a.appendChild(img);
-    grid.appendChild(a);
-  }
-}
-
-function refreshLightbox() {
-  const Ctor = window.SimpleLightbox;
-  const grid = document.querySelector('.gallery-grid');
-  if (!Ctor || !grid) return;
-
-  if (galleryLightbox && typeof galleryLightbox.destroy === 'function') {
-    galleryLightbox.destroy();
-    galleryLightbox = null;
-  }
-
-  const anchors = grid.querySelectorAll('a[href]');
-  if (!anchors.length) return;
-
-  galleryLightbox = new Ctor('.gallery-grid a', {
-    captionsData: 'caption',
-    captionDelay: 250,
-  });
-}
-
-async function loadGallery() {
-  const grid = document.getElementById('gallery-grid');
-  const moreBtn = document.getElementById('gallery-load-more');
-  if (!grid) return;
-
-  grid.innerHTML = '';
-  /** @type {import('firebase/firestore').QueryDocumentSnapshot | null} */
-  let cursor = null;
-  let hasMore = true;
-
-  const loadPage = async () => {
-    try {
-      const { docs, empty } = await fetchGalleryPage(db, GALLERY_PAGE_SIZE, cursor);
-      if (empty && !cursor) {
-        const p = document.createElement('p');
-        p.className = 'empty-state';
-        p.textContent = 'הגלריה תעודכן בקרוב.';
-        grid.appendChild(p);
-        if (moreBtn) moreBtn.hidden = true;
-        return;
-      }
-      appendGalleryNodes(docs, grid);
-      cursor = docs.length ? docs[docs.length - 1] : cursor;
-      hasMore = docs.length === GALLERY_PAGE_SIZE;
-      if (moreBtn) moreBtn.hidden = !hasMore;
-      refreshLightbox();
-    } catch {
-      const p = document.createElement('p');
-      p.className = 'empty-state';
-      p.textContent = 'לא ניתן לטעון את הגלריה כרגע. נסו שוב מאוחר יותר.';
-      grid.appendChild(p);
-      if (moreBtn) moreBtn.hidden = true;
-    }
-  };
-
-  await loadPage();
-
-  if (moreBtn) {
-    moreBtn.addEventListener('click', async () => {
-      moreBtn.disabled = true;
-      await loadPage();
-      moreBtn.disabled = false;
-    });
-  }
-}
-
-function initHeader() {
-  const header = document.getElementById('site-header');
-  const toggle = document.getElementById('nav-toggle');
-  const mobile = document.getElementById('nav-mobile');
-
-  const solidOnScroll = () => {
-    if (!header) return;
-    header.classList.toggle('is-solid', window.scrollY > 40);
-  };
-  solidOnScroll();
-  window.addEventListener('scroll', solidOnScroll, { passive: true });
-
-  const closeMenu = () => {
-    if (!header || !toggle) return;
-    header.classList.remove('is-menu-open');
-    toggle.setAttribute('aria-expanded', 'false');
-  };
-
-  toggle?.addEventListener('click', () => {
-    if (!header || !toggle) return;
-    const open = header.classList.toggle('is-menu-open');
-    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
-  });
-
-  mobile?.querySelectorAll('a[data-scroll]').forEach((a) => {
-    a.addEventListener('click', closeMenu);
-  });
-
-  document.querySelectorAll('a[data-scroll]').forEach((a) => {
-    a.addEventListener('click', (e) => {
-      const href = a.getAttribute('href');
-      if (!href || !href.startsWith('#')) return;
-      const id = href.slice(1);
-      const target = document.getElementById(id);
-      if (target) {
-        e.preventDefault();
-        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        closeMenu();
-      }
-    });
-  });
-}
-
+/* ══════════════════════════════════════════════════════════════
+   SCROLL REVEALS
+   ══════════════════════════════════════════════════════════════ */
 function initReveal() {
-  const els = document.querySelectorAll('.reveal');
-  if (!els.length) return;
+  const els = document.querySelectorAll('[data-reveal]');
+  if (!els.length || !('IntersectionObserver' in window)) {
+    els.forEach((el) => el.classList.add('is-visible'));
+    return;
+  }
 
   const io = new IntersectionObserver(
     (entries) => {
-      entries.forEach((en) => {
-        if (en.isIntersecting) {
-          en.target.classList.add('is-visible');
-          io.unobserve(en.target);
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
         }
       });
     },
-    { rootMargin: '0px 0px -8% 0px', threshold: 0.08 }
+    { rootMargin: '0px 0px -6% 0px', threshold: 0.08 }
   );
 
   els.forEach((el) => io.observe(el));
 }
 
+/* ══════════════════════════════════════════════════════════════
+   FOOTER YEAR
+   ══════════════════════════════════════════════════════════════ */
 function setFooterYear() {
-  const el = document.getElementById('footer-copy');
-  if (!el) return;
-  const y = new Date().getFullYear();
-  el.textContent = `© ${y} לין יפרח — כל הזכויות שמורות`;
+  const el = document.getElementById('footer-year');
+  if (el) el.textContent = new Date().getFullYear();
 }
 
-async function bootstrap() {
+/* ══════════════════════════════════════════════════════════════
+   BOOT
+   ══════════════════════════════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
   setFooterYear();
   initHeader();
+  initSmoothScroll();
+  initMenuTabs();
   initReveal();
-
-  renderMenuSkeleton(6);
-
-  try {
-    const settings = await fetchMainSettings(db);
-    if (settings) applySettings(settings);
-    else applySettings({});
-  } catch {
-    applySettings({});
-  }
-
-  try {
-    const items = await fetchMenuItems(db);
-    buildMenuTabs(items);
-  } catch {
-    const tabs = document.getElementById('menu-tabs');
-    const grid = document.getElementById('menu-grid');
-    if (tabs) tabs.innerHTML = '';
-    if (grid) {
-      grid.innerHTML = '';
-      const p = document.createElement('p');
-      p.className = 'empty-state';
-      p.textContent = 'לא ניתן לטעון את התפריט. בדקו את החיבור או את הגדרות Firebase.';
-      grid.appendChild(p);
-    }
-  }
-
-  await loadGallery();
-}
-
-bootstrap();
+});
