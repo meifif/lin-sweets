@@ -1,12 +1,40 @@
 /**
  * Lin Sweets — public site
- * Static, no Firebase. Update MENU data below to edit content.
+ * Menu and gallery are driven by Google Sheets (CSV).
+ * Falls back to hardcoded data if the URL is empty or the fetch fails.
  */
 
 /* ══════════════════════════════════════════════════════════════
-   STATIC MENU DATA — edit this to update the site
+   GOOGLE SHEET CONFIG  (menu)
+   The sheet must be shared as "Anyone with the link can view".
+   The tab must be named exactly: menu
+   Columns: category | name | description | price | imageUrl
    ══════════════════════════════════════════════════════════════ */
-const MENU = {
+const MENU_SHEET_ID  = '1qOc99bkyYpHTgf7EruO9QsSPHZ7qH-7lEJQTO1TDp6k';
+const MENU_SHEET_TAB = 'menu'; // name of the sheet tab
+
+const MENU_SHEET_URL = MENU_SHEET_ID
+  ? `https://docs.google.com/spreadsheets/d/${MENU_SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(MENU_SHEET_TAB)}`
+  : '';
+
+/* ══════════════════════════════════════════════════════════════
+   GOOGLE DRIVE GALLERY CONFIG
+   The owner drops photos into a Drive folder — no sheet needed.
+   Setup (one-time, done by developer):
+   1. Go to https://console.cloud.google.com → create a project
+   2. Enable "Google Drive API"
+   3. Create an API key (Credentials → Create credentials → API key)
+   4. Restrict it: Application restrictions → HTTP referrers → add your domain
+   5. Paste the key and the Drive folder ID below
+   The folder must be shared as "Anyone with the link can view".
+   ══════════════════════════════════════════════════════════════ */
+const GOOGLE_API_KEY          = ''; // ← paste your Google API key here
+const GALLERY_DRIVE_FOLDER_ID = ''; // ← paste the Drive folder ID here (from the folder URL)
+
+/* ══════════════════════════════════════════════════════════════
+   FALLBACK DATA — used when URLs above are empty or unreachable
+   ══════════════════════════════════════════════════════════════ */
+const MENU_FALLBACK = {
   'מגשי ביס': [
     {
       name: 'ביס לחמניות בית',
@@ -90,7 +118,117 @@ const MENU = {
   ],
 };
 
-const CATEGORIES = Object.keys(MENU);
+const GALLERY_FALLBACK = [
+  { imageUrl: 'images/menu/rolls.jpg',      caption: 'ביס לחמניות בית', size: 'tall' },
+  { imageUrl: 'images/menu/quiche.jpg',     caption: 'קיש אישי',        size: ''     },
+  { imageUrl: 'images/menu/puff-pastry.jpg',caption: 'בצק עלים מלוח',   size: ''     },
+  { imageUrl: 'images/menu/vegetables.jpg', caption: 'מגש ירקות',       size: 'wide' },
+  { imageUrl: 'images/menu/fruits.jpg',     caption: 'מגש פירות',       size: 'tall' },
+  { imageUrl: 'images/menu/croissant.jpg',  caption: 'קוראסון בולגרית', size: ''     },
+];
+
+/* ══════════════════════════════════════════════════════════════
+   GOOGLE DRIVE URL HELPER
+   Converts a Drive share link to a direct image URL.
+   Share link:  https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+   Direct link: https://drive.usercontent.google.com/download?id=FILE_ID&export=view
+   ══════════════════════════════════════════════════════════════ */
+function driveUrl(url) {
+  if (!url) return '';
+  // Match /file/d/ID/view share links
+  const shareMatch = url.match(/\/file\/d\/([^/?#]+)/);
+  if (shareMatch) return `https://drive.usercontent.google.com/download?id=${shareMatch[1]}&export=view`;
+  // Match uc?export=view&id=ID or uc?id=ID legacy links
+  const ucMatch = url.match(/[?&]id=([^&]+)/);
+  if (ucMatch && url.includes('drive.google.com')) return `https://drive.usercontent.google.com/download?id=${ucMatch[1]}&export=view`;
+  return url; // external or already-converted URL — use as-is
+}
+
+/* ══════════════════════════════════════════════════════════════
+   CSV PARSER
+   ══════════════════════════════════════════════════════════════ */
+function parseCSVRow(line) {
+  const fields = [];
+  let field = '';
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      if (inQuotes && line[i + 1] === '"') { field += '"'; i++; }
+      else inQuotes = !inQuotes;
+    } else if (ch === ',' && !inQuotes) {
+      fields.push(field.trim());
+      field = '';
+    } else {
+      field += ch;
+    }
+  }
+  fields.push(field.trim());
+  return fields;
+}
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').trim().split('\n');
+  if (lines.length < 2) return [];
+  const headers = parseCSVRow(lines[0]);
+  return lines.slice(1)
+    .filter((l) => l.trim())
+    .map((line) => {
+      const values = parseCSVRow(line);
+      return Object.fromEntries(headers.map((h, i) => [h, values[i] || '']));
+    });
+}
+
+/* ══════════════════════════════════════════════════════════════
+   DATA LOADERS
+   ══════════════════════════════════════════════════════════════ */
+async function loadMenuData() {
+  if (!MENU_SHEET_URL) return MENU_FALLBACK;
+  try {
+    const res = await fetch(MENU_SHEET_URL);
+    if (!res.ok) throw new Error(res.status);
+    const rows = parseCSV(await res.text());
+    const menu = {};
+    rows.forEach((row) => {
+      const cat = row['category'];
+      if (!cat) return;
+      if (!menu[cat]) menu[cat] = [];
+      menu[cat].push({
+        name:     row['name'],
+        desc:     row['description'],
+        price:    row['price'],
+        imageUrl: driveUrl(row['imageUrl']),
+      });
+    });
+    return Object.keys(menu).length ? menu : MENU_FALLBACK;
+  } catch {
+    return MENU_FALLBACK;
+  }
+}
+
+// Mosaic size pattern applied to gallery images in order
+const GALLERY_SIZE_PATTERN = ['tall', '', '', 'wide', 'tall', ''];
+
+async function loadGalleryData() {
+  try {
+    const res = await fetch('images/gallery/');
+    if (!res.ok) throw new Error(res.status);
+    const html = await res.text();
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const files = [...doc.querySelectorAll('a[href]')]
+      .map((a) => a.getAttribute('href'))
+      .filter((href) => /\.(jpe?g|png|webp)$/i.test(href))
+      .map((href) => 'images/gallery/' + href.replace(/^.*\//, ''));
+    if (!files.length) return GALLERY_FALLBACK;
+    return files.map((path, i) => ({
+      imageUrl: path,
+      caption:  '',
+      size:     GALLERY_SIZE_PATTERN[i % GALLERY_SIZE_PATTERN.length],
+    }));
+  } catch {
+    return GALLERY_FALLBACK;
+  }
+}
 
 /* ══════════════════════════════════════════════════════════════
    HEADER
@@ -100,19 +238,16 @@ function initHeader() {
   const burger = document.getElementById('burger');
   const drawer = document.getElementById('drawer');
 
-  // Solid on scroll
   const onScroll = () => header.classList.toggle('is-solid', window.scrollY > 50);
   onScroll();
   window.addEventListener('scroll', onScroll, { passive: true });
 
-  // Mobile drawer toggle
   burger.addEventListener('click', () => {
     const open = header.classList.toggle('is-open');
     burger.setAttribute('aria-expanded', open);
     drawer.setAttribute('aria-hidden', !open);
   });
 
-  // Close drawer on link click
   drawer.querySelectorAll('a').forEach((a) => {
     a.addEventListener('click', () => {
       header.classList.remove('is-open');
@@ -143,9 +278,9 @@ function initSmoothScroll() {
 /* ══════════════════════════════════════════════════════════════
    MENU
    ══════════════════════════════════════════════════════════════ */
-function renderMenu(category) {
+function renderMenu(menuData, category) {
   const grid = document.getElementById('menu-grid');
-  const items = MENU[category] || [];
+  const items = menuData[category] || [];
   grid.innerHTML = '';
 
   items.forEach((item) => {
@@ -160,6 +295,7 @@ function renderMenu(category) {
       img.src = item.imageUrl;
       img.alt = item.name;
       img.loading = 'lazy';
+      img.referrerPolicy = 'no-referrer';
       imgDiv.appendChild(img);
     } else {
       const placeholder = document.createElement('div');
@@ -209,9 +345,10 @@ function renderMenu(category) {
   });
 }
 
-function initMenuTabs() {
+function initMenuTabs(menuData) {
   const tabsEl = document.getElementById('menu-tabs');
-  let active = CATEGORIES[0];
+  const categories = Object.keys(menuData);
+  let active = categories[0];
 
   const setActive = (cat) => {
     active = cat;
@@ -220,10 +357,10 @@ function initMenuTabs() {
       btn.classList.toggle('is-active', on);
       btn.setAttribute('aria-selected', on);
     });
-    renderMenu(cat);
+    renderMenu(menuData, cat);
   };
 
-  CATEGORIES.forEach((cat, i) => {
+  categories.forEach((cat, i) => {
     const btn = document.createElement('button');
     btn.type = 'button';
     btn.className = 'menu-tab' + (i === 0 ? ' is-active' : '');
@@ -235,7 +372,44 @@ function initMenuTabs() {
     tabsEl.appendChild(btn);
   });
 
-  renderMenu(active);
+  renderMenu(menuData, active);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   GALLERY
+   ══════════════════════════════════════════════════════════════ */
+function renderGallery(items) {
+  const mosaic = document.querySelector('.gallery-mosaic');
+  if (!mosaic) return;
+  mosaic.innerHTML = '';
+
+  items.forEach((item) => {
+    const fig = document.createElement('figure');
+    fig.className = 'gal-item' +
+      (item.size === 'tall' ? ' gal-item--tall' : '') +
+      (item.size === 'wide' ? ' gal-item--wide' : '');
+    fig.setAttribute('data-reveal', '');
+
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'gal-img';
+
+    const img = document.createElement('img');
+    img.src = item.imageUrl;
+    img.alt = item.caption;
+    img.loading = 'lazy';
+    img.referrerPolicy = 'no-referrer';
+
+    imgWrap.appendChild(img);
+    fig.appendChild(imgWrap);
+
+    if (item.caption) {
+      const cap = document.createElement('figcaption');
+      cap.textContent = item.caption;
+      fig.appendChild(cap);
+    }
+
+    mosaic.appendChild(fig);
+  });
 }
 
 /* ══════════════════════════════════════════════════════════════
@@ -274,10 +448,17 @@ function setFooterYear() {
 /* ══════════════════════════════════════════════════════════════
    BOOT
    ══════════════════════════════════════════════════════════════ */
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   setFooterYear();
   initHeader();
   initSmoothScroll();
-  initMenuTabs();
+
+  const [menuData, galleryData] = await Promise.all([
+    loadMenuData(),
+    loadGalleryData(),
+  ]);
+
+  initMenuTabs(menuData);
+  renderGallery(galleryData);
   initReveal();
 });
